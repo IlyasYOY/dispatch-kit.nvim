@@ -1,6 +1,8 @@
 dispatch-kit	dispatch-kit.txt	/*dispatch-kit*
 dispatch-kit-adapters	dispatch-kit.txt	/*dispatch-kit-adapters*
 dispatch-kit-backends	dispatch-kit.txt	/*dispatch-kit-backends*
+dispatch-kit-development	dispatch-kit.txt	/*dispatch-kit-development*
+dispatch-kit-health	dispatch-kit.txt	/*dispatch-kit-health*
 dispatch-kit-requirements	dispatch-kit.txt	/*dispatch-kit-requirements*
 dispatch-kit-setup	dispatch-kit.txt	/*dispatch-kit-setup*
 dispatch-kit-tasks	dispatch-kit.txt	/*dispatch-kit-tasks*

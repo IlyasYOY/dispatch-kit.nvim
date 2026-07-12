@@ -19,14 +19,36 @@ back to Neovim's `makeprg`/quickfix workflow when it is not.
 - Tree-sitter parsers are optional and needed only for `current` actions and
   Makefile target discovery; the `nvim-treesitter` plugin itself is not required
 
+Run `:checkhealth dispatch-kit` to verify the Neovim runtime APIs and report
+whether optional vim-dispatch support is available. Adapter executables,
+configuration files, and parsers remain action-specific and are checked when
+their commands run.
+
 ## Installation
 
-With Neovim's built-in package manager:
+With Neovim 0.12 or newer, use the built-in `vim.pack`:
 
 ```lua
 vim.pack.add {
     { src = "https://github.com/IlyasYOY/dispatch-kit.nvim" },
     { src = "https://github.com/tpope/vim-dispatch" }, -- optional
+}
+```
+
+Neovim 0.11 users should install the plugin with lazy.nvim or another package
+manager.
+
+With lazy.nvim:
+
+```lua
+{
+    "IlyasYOY/dispatch-kit.nvim",
+    opts = {
+        adapters = {
+            go = true,
+            python = true,
+        },
+    },
 }
 ```
 
@@ -179,4 +201,13 @@ See `:help dispatch-kit` for the full reference.
 ```bash
 make check
 make test NVIM_VERSION=v0.11.7
+make test NVIM_VERSION=v0.12.4
+make test NVIM_VERSION=nightly
 ```
+
+`make check` is non-mutating and runs Luacheck, StyLua validation, isolated
+headless Neovim specs, and tracked Vim help validation.
+
+## License
+
+MIT. See [LICENSE](./LICENSE).
