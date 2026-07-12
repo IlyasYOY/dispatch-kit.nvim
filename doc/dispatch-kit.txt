@@ -1,0 +1,111 @@
+*dispatch-kit.txt* Declarative buffer-local tasks for Neovim
+
+This plugin is intentionally constrained by the author's personal Neovim
+workflow. Its scope and design prioritize that usage, and requested features
+may be declined. The project is MIT licensed; users are welcome to fork it and
+adapt it to their own workflows.
+
+==============================================================================
+CONTENTS                                                     *dispatch-kit*
+
+1. Requirements                                      |dispatch-kit-requirements|
+2. Setup                                             |dispatch-kit-setup|
+3. Task schema                                       |dispatch-kit-tasks|
+4. Backends                                          |dispatch-kit-backends|
+5. Adapters                                          |dispatch-kit-adapters|
+
+==============================================================================
+1. REQUIREMENTS                                      *dispatch-kit-requirements*
+
+Neovim 0.11 or newer is required. vim-dispatch is optional. Built-in
+Tree-sitter APIs are used, but parsers are required only by current-scope and
+Makefile actions. No dotfiles environment variables or Lua modules are used.
+
+==============================================================================
+2. SETUP                                                   *dispatch-kit-setup*
+
+setup({opts})                                *dispatch-kit.setup()*
+
+    require("dispatch-kit").setup {
+        backend = "auto",
+        makeprg = {
+            bang = true,
+            silent = true,
+        },
+        adapters = {
+            go = true,
+            python = true,
+        },
+        tasks = {},
+    }
+
+All fields are optional. Defaults are backend="auto",
+makeprg={bang=true,silent=true}, adapters={}, and tasks={}. Adapters are always
+opt-in. Valid backends are "auto", "dispatch", and "makeprg". Each call
+replaces dispatch-kit's previous configuration and repeat state, while
+preserving foreign buffer-local commands and mappings.
+
+==============================================================================
+3. TASK SCHEMA                                             *dispatch-kit-tasks*
+
+A task family has these fields:
+
+id              Unique string and key for cross-buffer repeat state.
+filetypes       Non-empty list of matching filetypes.
+compiler        Optional default compiler name.
+actions         Non-empty list of action declarations.
+repeat_last     Optional {name, keymap?, desc?, empty_message?}.
+
+An action has these fields:
+
+name            Buffer-local user command name.
+desc            Command and mapping description.
+scope           Usually "all", "package", "file", or "current".
+command         Command table or builder function.
+bang            When true, the user command accepts !.
+count           Optional default count, commonly 0.
+nargs           Optional user-command nargs value.
+keymaps         Optional {run?, bang?} normal-mode mappings.
+
+Builders receive {bufnr, scope, bang, count, args, fargs}. They return:
+
+    { argv = { "program", "argument" }, cwd = "/path", compiler = "make" }
+
+argv is required and is shell-escaped one element at a time. cwd and compiler
+are optional. Raw shell command strings are rejected. A builder can return nil
+to cancel, or a function accepting done(command) for an asynchronous selector.
+
+The fully resolved command is saved after successful launch. repeat_last runs
+the saved argv, cwd, and compiler without invoking the builder again.
+
+==============================================================================
+4. BACKENDS                                               *dispatch-kit-backends*
+
+auto        Use :Dispatch when it exists, otherwise use makeprg.
+dispatch    Require :Dispatch and report an error if unavailable.
+makeprg     Temporarily install the command as buffer-local 'makeprg', apply
+            the selected compiler, run :make, and restore 'makeprg',
+            'errorformat', and compiler state. makeprg.bang adds ! to prevent
+            jumping to the first quickfix entry. makeprg.silent adds :silent
+            to hide command feedback. Both default to true.
+
+The backend is selected at execution time. vim-dispatch is therefore an
+optional runtime dependency rather than a load-time requirement.
+
+==============================================================================
+5. ADAPTERS                                               *dispatch-kit-adapters*
+
+go          GolangCI lint, go test, benchmarks, and builds. golangci accepts
+            binary? and fallback_config?. Project configs take precedence.
+java        Gradle/Maven tests and PMD/Checkstyle lint. The lint tools accept
+            {config=..., binary?}; config is required when the command runs.
+python      pytest all/package/file/current tasks.
+javascript Jest or Vitest for JavaScript, JSX, TypeScript, and TSX. The nearest
+            package.json selects Vitest first, then Jest; Jest is the fallback.
+proto       protolint and buf lint with a shared repeat command.
+make        Select any parsed target or run the target under the cursor.
+
+Missing tools and parsers do not prevent setup. The affected action reports a
+warning or execution error when invoked.
+
+vim:tw=78:ts=8:noet:ft=help:norl:
