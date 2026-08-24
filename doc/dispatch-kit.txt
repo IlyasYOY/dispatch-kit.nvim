@@ -130,7 +130,7 @@ setup.
 help validation. Stable compatibility commands are:
 
     make test NVIM_VERSION=v0.11.7
-    make test NVIM_VERSION=v0.12.4
+    make test NVIM_VERSION=v0.12.5
 
 Nightly is an additional non-blocking compatibility probe:
 
